@@ -26,7 +26,8 @@ public class Constants {
     public static final String AMOUNT_XPATH="./*[local-name()='RtrdIntrBkSttlmAmt']";
     public static final String CDTTRFTXINF_XPATH="/*[local-name()='RequestPayload']/*[local-name()='Document']//*[local-name()='TxInf']";
     public static final String BIZMSGID_XPATH="/*[local-name()='RequestPayload']/*[local-name()='AppHdr']/*[local-name()='BizMsgIdr']";
-    public static final String BATCH_ID_XPATH = ".//*[local-name()='OrgnlTxRef']/*[local-name()='UndrlygCstmrCdtTrf']//*[local-name()='RmtInf']";
+    public static final String BATCH_ID_XPATH = ".//*[local-name()='OrgnlTxRef']/*[local-name()='UndrlygCstmrCdtTrf']//*[local-name()='RmtInf']/*[local-name()='Ustrd']";
+
     public static final String BATCH_CREDT_XPATH = "/*[local-name()='RequestPayload']/*[local-name()='AppHdr']/*[local-name()='CreDt']";
     public static final String BODY = "body";
     public static final String PAYLOAD ="payload";

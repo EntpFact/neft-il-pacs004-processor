@@ -161,9 +161,9 @@ public class NilRepository {
     public void saveAllTransactionAudits(List<TransactionAudit> transactionAudits) {
         String sql = "INSERT INTO network_il.transaction_audit (" +
                 "msg_id, txn_id, end_to_end_id,batch_id, return_id,  source, target, " +
-                "flow_type, msg_type, amount, status, batch_creation_date,batch_timestamp ,created_time, modified_timestamp) " +
+                "flow_type, msg_type, amount, status,version, batch_creation_date,batch_timestamp ,created_time, modified_timestamp) " +
                 "VALUES (:msg_id, :txn_id, :end_to_end_id, :batch_id,:return_id, " +
-                ":source, :target, :flow_type, :msg_type, :amount,:status, :batch_creation_date,:batch_timestamp, " +
+                ":source, :target, :flow_type, :msg_type, :amount,:status, :version,:batch_creation_date,:batch_timestamp, " +
                 ":created_time, :modified_timestamp)";
 
         LocalDateTime timestamp = LocalDateTime.now();
@@ -186,6 +186,7 @@ public class NilRepository {
                     params.addValue("batch_creation_date", tx.getBatchDate());
                     params.addValue("batch_timestamp", tx.getBatchTime());
                     params.addValue("modified_timestamp", timestamp);
+                    params.addValue("version", 1);
                     return params;
                 })
                 .toList();
