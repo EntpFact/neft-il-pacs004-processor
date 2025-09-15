@@ -120,12 +120,12 @@ public class Pacs004XmlProcessor {
             String prefix = payload.getHeader().getPrefix();
 
             if (!fcList.isEmpty()) {
-                processGroup(document, xml, prefix, batchCreationDate, batchCreationTimeStamp,
+                processGroup(payload,document, xml, prefix, batchCreationDate, batchCreationTimeStamp,
                         bizMsgIdr, consolidateAmountFC, fcList, "DISPATCHER_FC", fcTopic, invalidReq, flowType);
             }
 
             if (!ephList.isEmpty()) {
-                processGroup(document, xml, prefix, batchCreationDate, batchCreationTimeStamp,
+                processGroup(payload,document, xml, prefix, batchCreationDate, batchCreationTimeStamp,
                         bizMsgIdr, consolidateAmountEPH, ephList, "DISPATCHER_EPH", ephTopic, invalidReq, flowType);
             }
 
@@ -148,7 +148,7 @@ public class Pacs004XmlProcessor {
         }
     }
 
-    private void processGroup(Document document, String xml, String prefix, LocalDate batchDate,
+    private void processGroup(ReqPayload payload,Document document, String xml, String prefix, LocalDate batchDate,
                               LocalDateTime batchTime, String bizMsgIdr, double consolidateAmt,
                               List<Pacs004Fields> list, String target, String topic,
                               boolean invalidReq, String flowType) throws Exception {
@@ -176,6 +176,7 @@ public class Pacs004XmlProcessor {
         tracker.setBatchCreationDate(batchDate);
         tracker.setConsolidateAmt(BigDecimal.valueOf(consolidateAmt));
         tracker.setMsgType(utilityMethods.getMsgDefIdr(document));
+        tracker.setTransformedJsonReq(payload);
         tracker.setOrgnlReq(prefix + xml);
 
         dao.saveDataInMsgEventTracker(tracker);

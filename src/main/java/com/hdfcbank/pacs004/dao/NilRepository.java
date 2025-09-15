@@ -1,9 +1,12 @@
 package com.hdfcbank.pacs004.dao;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hdfcbank.pacs004.model.MsgEventTracker;
 import com.hdfcbank.pacs004.model.TransactionAudit;
 import lombok.extern.slf4j.Slf4j;
+import org.postgresql.util.PGobject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,6 +15,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,17 +49,16 @@ public class NilRepository {
 
     }
 
-    public void saveDataInMsgEventTracker(MsgEventTracker msgEventTracker) {
+    public void saveDataInMsgEventTracker(MsgEventTracker msgEventTracker) throws JsonProcessingException, SQLException {
         String sql = "INSERT INTO network_il.msg_event_tracker\n" +
                 "(msg_id, \"source\", target, batch_id, flow_type, msg_type, original_req, invalid_msg, \n" +
-                " replay_count, original_req_count, consolidate_amt, intermediate_req, intemdiate_count, \n" +
+                " replay_count, original_req_count, consolidate_amt, transformed_json_req,intermediate_req, intemdiate_count, \n" +
                 " status, batch_creation_date, batch_timestamp, created_time, modified_timestamp, \"version\")\n" +
                 "VALUES" +
                 " (:msg_id, :source, :target,:batch_id, :flow_type, :msg_type, :original_req, :invalid_msg, :replay_count, :original_req_count," +
-                " :consolidate_amt, :intermediate_req, :intemdiate_count, :status,:batch_creation_date,:batch_timestamp, :created_time, :modified_timestamp,:version )";
+                " :consolidate_amt, :transformed_json_req,:intermediate_req, :intemdiate_count, :status,:batch_creation_date,:batch_timestamp, :created_time, :modified_timestamp,:version )";
 
         LocalDateTime timestamp = LocalDateTime.now();
-        LocalDate date = LocalDate.now();
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("msg_id", msgEventTracker.getMsgId());
         params.addValue("source", msgEventTracker.getSource());
@@ -66,6 +69,7 @@ public class NilRepository {
         params.addValue("original_req_count", msgEventTracker.getOrgnlReqCount());
         params.addValue("batch_id", msgEventTracker.getBatchId());
         params.addValue("invalid_msg", msgEventTracker.isInvalidPayload());
+        params.addValue("transformed_json_req",msgEventTracker.getTransformedJsonReq());
         params.addValue("replay_count", 0);
         params.addValue("consolidate_amt", msgEventTracker.getConsolidateAmt());
         params.addValue("intermediate_req", msgEventTracker.getIntermediateReq());
@@ -77,9 +81,21 @@ public class NilRepository {
 
         params.addValue("created_time", timestamp);
         params.addValue("modified_timestamp", timestamp);
+        ObjectMapper objectMapper = new ObjectMapper();
+
+            // 1. Convert the ReqPayload object to JSON string
+            String jsonString = objectMapper.writeValueAsString(msgEventTracker.getTransformedJsonReq());
+
+            // 2. Wrap the string as a PGobject
+            PGobject jsonObject = new PGobject();
+            jsonObject.setType("json"); // or "jsonb" if your column is JSONB
+            jsonObject.setValue(jsonString);
+            // 3. Add to parameters
+            params.addValue("transformed_json_req", jsonObject);
+
         namedParameterJdbcTemplate.update(sql, params);
 
-    }
+        }
 //
 //    public MsgEventTracker findByMsgId(String msgId) {
 //        String sql = "SELECT * FROM network_il.msg_event_tracker WHERE msg_id = :msgId";

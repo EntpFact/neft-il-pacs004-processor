@@ -1,5 +1,6 @@
 package com.hdfcbank.pacs004.dao;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hdfcbank.pacs004.model.MsgEventTracker;
 import com.hdfcbank.pacs004.model.TransactionAudit;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -54,7 +56,7 @@ class NilRepositoryTest {
     }
 
     @Test
-    void testSaveDataInMsgEventTracker() {
+    void testSaveDataInMsgEventTracker() throws SQLException, JsonProcessingException {
         MsgEventTracker tracker = new MsgEventTracker();
         tracker.setMsgId("MSG123");
         tracker.setSource("SRC");
