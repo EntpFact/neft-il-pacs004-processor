@@ -180,7 +180,7 @@ public class Pacs004XmlProcessor {
         tracker.setOrgnlReq(prefix + xml);
 
         dao.saveDataInMsgEventTracker(tracker);
-        kafkautils.publishToResponseTopic(outputDocString, topic);
+        kafkautils.publishToResponseTopic(outputDocString, topic,bizMsgIdr);
     }
 
     private TransactionAudit buildTransactionAudit(Document doc, String xml,
@@ -268,6 +268,7 @@ public class Pacs004XmlProcessor {
 
     public Boolean validateRequest(ReqPayload request) throws JsonProcessingException {
         Boolean isValid =  request.getHeader().isInvalidPayload();
+
         if(!isValid){
             errorHandling.handleInvalidPayload(request);
         }

@@ -1,5 +1,6 @@
 package com.hdfcbank.pacs004.utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hdfcbank.pacs004.exception.NILException;
 import com.hdfcbank.pacs004.model.ReqPayload;
@@ -26,13 +27,15 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 @Slf4j
 @Component
 public class NILRouterCommonUtility {
 
     @Autowired
-    private ObjectMapper mapper;
+    private ObjectMapper objectMapper;
 
     /**
      * Parses an XML string into a Document object with namespace awareness.
@@ -56,10 +59,14 @@ public class NILRouterCommonUtility {
     }
     public ReqPayload convertToMap(String request) {
         try {
+
             if (request == null || request.trim().isEmpty()) {
                 return null;
             }
-            return mapper.readValue(request,  ReqPayload.class);
+            JsonNode rootNode = objectMapper.readTree(request);
+            String base64Data = rootNode.get("data_base64").asText();
+            String reqPayloadString = new String(Base64.getDecoder().decode(base64Data), StandardCharsets.UTF_8);
+            return objectMapper.readValue(reqPayloadString,  ReqPayload.class);
         } catch (Exception e) {
             log.error("Failed to convert request string to map", e);
             throw new NILException("Invalid request format. Expecting JSON object.", e);

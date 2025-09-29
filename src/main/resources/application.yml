@@ -1,5 +1,5 @@
 server:
-  port: ${port:8089}
+  port: ${port:1047}
 
 logging:
   level:
@@ -12,6 +12,33 @@ spring:
     username: ${DATASOURCE_USERNAME:admin}
     password: ${DATASOURCE_PWD:test123}
     driver-class-name: ${DATASOURCE_DRIVERCLASS:org.postgresql.Driver}
+#  kafka:
+#    listener:
+#    concurrency: 1
+#    consumer:
+#      properties:
+#        bootstrap.servers: 34.28.251.45:9092
+#        #34.28.251.45:9092
+#        #20.192.24.194:39092
+#        auto.offset.reset: earliest
+#        key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#        value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#    producer:
+#      properties:
+#        bootstrap.servers: 34.28.251.45:9092
+#        key.serializer: org.apache.kafka.common.serialization.StringSerializer
+#        value.serializer: org.apache.kafka.common.serialization.StringSerializer
+#        enable.auto.commit: false
+#        missing.topics.fatal: false
+#
+#routing:
+#  header: testHeader
+#message:
+#  xpath:
+#    mappings:
+#      pacs.004.001.10: ${PACS004_BATCH_XPATH:"(.//*[local-name()='RmtInf']//*[local-name()='Ustrd'])[1]"}
+#processor:
+#  pacs.004.001.10: ${PACS004PROCESSOR:pacs004processor}
 
 topic:
   dispatchertopic: ${DISPATCHERTOPIC:DISPATCHERTOPIC}
@@ -19,4 +46,5 @@ topic:
   fctopic: ${FCTOPIC:FCTOPIC}
   ephtopic: ${EPHTOPIC:EPHTOPIC}
   sfmstopic: ${SFMSTOPIC:SFMSTOPIC}
+  pacs.004.001.10: ${PACS004TOPIC:pacs004Topic}
 
