@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hdfcbank.pacs004.exception.NILException;
+import com.hdfcbank.pacs004.kafkaproducer.KafkaUtils;
 import com.hdfcbank.pacs004.model.MsgEventTracker;
 import com.hdfcbank.pacs004.model.ReqPayload;
 import com.hdfcbank.pacs004.model.Response;
@@ -11,7 +12,6 @@ import com.hdfcbank.pacs004.service.Pacs004XmlProcessor;
 import com.hdfcbank.pacs004.utils.NILRouterCommonUtility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.MessageChannel;
@@ -33,6 +33,7 @@ public class ProcessController {
 
     @Autowired
     NILRouterCommonUtility nilRouterCommonUtility;
+
 
     @CrossOrigin
     @GetMapping(path = "/healthz")
@@ -67,5 +68,29 @@ public class ProcessController {
         }).onErrorResume(ex -> {
             return Mono.just(new ResponseEntity<>(new Response("ERROR", "Message Processing Failed"), HttpStatus.INTERNAL_SERVER_ERROR));
         });
+    }
+
+
+    @CrossOrigin
+    @PostMapping("/sendToKafka")
+    public ResponseEntity<String> sendToKafka(@RequestBody String request)  {
+        log.info("....PACS004 sendToKafka Started.... ");
+        ReqPayload requestMap = nilRouterCommonUtility.convertToMap(request);
+        try {
+            if (!pacs004XmlProcessor.validateRequest(requestMap)) {
+            pacs004XmlProcessor.parseXml(requestMap);
+                return new ResponseEntity<>("Message sent to Kafka: ", HttpStatus.OK);
+            }else{
+                pacs004XmlProcessor.saveInvalidPayload(requestMap);
+                return new ResponseEntity<>("Invalid JSON : ", HttpStatus.BAD_REQUEST);
+            }
+
+        } catch (Exception ex) {
+            log.error("Failed in consuming the message: {}", ex);
+            return new ResponseEntity<>("Error processing to Kafka: ", HttpStatus.BAD_REQUEST);
+
+
+        }
+
     }
 }

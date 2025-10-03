@@ -13,15 +13,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.*;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -181,6 +185,28 @@ public class Pacs004XmlProcessor {
 
         dao.saveDataInMsgEventTracker(tracker);
         kafkautils.publishToResponseTopic(outputDocString, topic,bizMsgIdr);
+    }
+
+    public void saveInvalidPayload(ReqPayload requestMap) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException, SQLException {
+
+        Document document = DocumentBuilderFactory.newInstance()
+                .newDocumentBuilder()
+                .parse(new InputSource(new StringReader(requestMap.getBody().getPayload())));
+
+        XPath xpath = XPathFactory.newInstance().newXPath();
+
+        String bizMsgIdr = xpath.evaluate(BIZMSGID_XPATH, document);
+        MsgEventTracker tracker = new MsgEventTracker();
+        tracker.setMsgId(bizMsgIdr);
+        tracker.setSource(SFMS);
+        tracker.setBatchId(" ");
+        tracker.setTarget(requestMap.getHeader().getTarget());
+        tracker.setOrgnlReq(requestMap.getHeader().getPrefix() + requestMap.getBody().getPayload());
+        tracker.setInvalidPayload(requestMap.getHeader().isInvalidPayload());
+
+        dao.saveDataInMsgEventTracker(tracker);
+//        errorHandling.handleInvalidPayload(requestMap);
+
     }
 
     private TransactionAudit buildTransactionAudit(Document doc, String xml,

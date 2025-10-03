@@ -1,5 +1,5 @@
 server:
-  port: ${port:1047}
+  port: ${port:10047}
 
 logging:
   level:
@@ -28,6 +28,5 @@ topic:
   fctopic: ${FCTOPIC:FCTOPIC}
   ephtopic: ${EPHTOPIC:EPHTOPIC}
   sfmstopic: ${SFMSTOPIC:SFMSTOPIC}
-  pacs.004.001.10: ${PACS004TOPIC:pacs004Topic}
 
 
