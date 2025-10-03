@@ -38,8 +38,6 @@ class Pacs004XmlProcessorTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        pacs004XmlProcessor.fcTopic = "fc-topic";
-        pacs004XmlProcessor.ephTopic = "eph-topic";
     }
 
     @Test

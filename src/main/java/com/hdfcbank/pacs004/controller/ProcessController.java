@@ -1,11 +1,7 @@
 package com.hdfcbank.pacs004.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hdfcbank.pacs004.exception.NILException;
-import com.hdfcbank.pacs004.kafkaproducer.KafkaUtils;
-import com.hdfcbank.pacs004.model.MsgEventTracker;
 import com.hdfcbank.pacs004.model.ReqPayload;
 import com.hdfcbank.pacs004.model.Response;
 import com.hdfcbank.pacs004.service.Pacs004XmlProcessor;
@@ -14,15 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.bind.annotation.*;
-import org.w3c.dom.Document;
 import reactor.core.publisher.Mono;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -72,14 +61,14 @@ public class ProcessController {
 
 
     @CrossOrigin
-    @PostMapping("/sendToKafka")
-    public ResponseEntity<String> sendToKafka(@RequestBody String request)  {
-        log.info("....PACS004 sendToKafka Started.... ");
+    @PostMapping("/sendToProcessor")
+    public ResponseEntity<String> sendToProcessor(@RequestBody String request)  {
+        log.info("....PACS004 sendToProcessor Started.... ");
         ReqPayload requestMap = nilRouterCommonUtility.convertToMap(request);
         try {
             if (!pacs004XmlProcessor.validateRequest(requestMap)) {
             pacs004XmlProcessor.parseXml(requestMap);
-                return new ResponseEntity<>("Message sent to Kafka: ", HttpStatus.OK);
+                return new ResponseEntity<>("Message sent to processor: ", HttpStatus.OK);
             }else{
                 pacs004XmlProcessor.saveInvalidPayload(requestMap);
                 return new ResponseEntity<>("Invalid JSON : ", HttpStatus.BAD_REQUEST);
@@ -87,7 +76,7 @@ public class ProcessController {
 
         } catch (Exception ex) {
             log.error("Failed in consuming the message: {}", ex);
-            return new ResponseEntity<>("Error processing to Kafka: ", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Error processing to processor: ", HttpStatus.BAD_REQUEST);
 
 
         }

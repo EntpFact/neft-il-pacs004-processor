@@ -48,10 +48,6 @@ public class Pacs004XmlProcessor {
     @Autowired
     ErrorHandling errorHandling;
 
-    @Value("${topic.fctopic}")
-    String fcTopic;
-    @Value("${topic.ephtopic}")
-    String ephTopic;
 
     public void parseXml(ReqPayload payload) throws Exception {
         Optional.ofNullable(payload.getHeader())
@@ -125,12 +121,12 @@ public class Pacs004XmlProcessor {
 
             if (!fcList.isEmpty()) {
                 processGroup(payload,document, xml, prefix, batchCreationDate, batchCreationTimeStamp,
-                        bizMsgIdr, consolidateAmountFC, fcList, "DISPATCHER_FC", fcTopic, invalidReq, flowType);
+                        bizMsgIdr, consolidateAmountFC, fcList, "DISPATCHER_FC", invalidReq, flowType);
             }
 
             if (!ephList.isEmpty()) {
                 processGroup(payload,document, xml, prefix, batchCreationDate, batchCreationTimeStamp,
-                        bizMsgIdr, consolidateAmountEPH, ephList, "DISPATCHER_EPH", ephTopic, invalidReq, flowType);
+                        bizMsgIdr, consolidateAmountEPH, ephList, "DISPATCHER_EPH", invalidReq, flowType);
             }
 
             // Save transaction audits
@@ -154,12 +150,12 @@ public class Pacs004XmlProcessor {
 
     private void processGroup(ReqPayload payload,Document document, String xml, String prefix, LocalDate batchDate,
                               LocalDateTime batchTime, String bizMsgIdr, double consolidateAmt,
-                              List<Pacs004Fields> list, String target, String topic,
+                              List<Pacs004Fields> list, String target,
                               boolean invalidReq, String flowType) throws Exception {
 
         Document filteredDoc = filterOrgnlItmAndSts(document,
                 "DISPATCHER_FC".equals(target) ? 0 : 5,
-                "DISPATCHER_FC".equals(target) ? 4 : 9,
+                "DISPATCHER_EPH".equals(target) ? 4 : 9,
                 list.size(), consolidateAmt);
 
         String outputDocString = documentToXml(filteredDoc);
@@ -184,7 +180,7 @@ public class Pacs004XmlProcessor {
         tracker.setOrgnlReq(prefix + xml);
 
         dao.saveDataInMsgEventTracker(tracker);
-        kafkautils.publishToResponseTopic(outputDocString, topic,bizMsgIdr);
+//        kafkautils.publishToResponseTopic(outputDocString, topic,bizMsgIdr);
     }
 
     public void saveInvalidPayload(ReqPayload requestMap) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException, SQLException {
@@ -200,9 +196,10 @@ public class Pacs004XmlProcessor {
         tracker.setMsgId(bizMsgIdr);
         tracker.setSource(SFMS);
         tracker.setBatchId(" ");
-        tracker.setTarget(requestMap.getHeader().getTarget());
+        tracker.setTarget("SENT_TO_DISPATCHER");
         tracker.setOrgnlReq(requestMap.getHeader().getPrefix() + requestMap.getBody().getPayload());
         tracker.setInvalidPayload(requestMap.getHeader().isInvalidPayload());
+        tracker.setTransformedJsonReq(requestMap);
 
         dao.saveDataInMsgEventTracker(tracker);
 //        errorHandling.handleInvalidPayload(requestMap);

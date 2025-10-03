@@ -42,8 +42,5 @@ spring:
 
 topic:
   dispatchertopic: ${DISPATCHERTOPIC:DISPATCHERTOPIC}
-  errortopic: ${EPH:EPH}
-  fctopic: ${FCTOPIC:FCTOPIC}
-  ephtopic: ${EPHTOPIC:EPHTOPIC}
-  sfmstopic: ${SFMSTOPIC:SFMSTOPIC}
+  defaultErrorSwitch: ${EPH:EPH}
 

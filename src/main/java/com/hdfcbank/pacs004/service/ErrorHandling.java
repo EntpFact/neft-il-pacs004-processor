@@ -15,8 +15,8 @@ public class ErrorHandling {
     @Autowired
     KafkaUtils kafkaUtils;
 
-    @Value("${topic.errortopic}")
-    private String errortopic;
+    @Value("${topic.defaultErrorSwitch}")
+    private String defaultSwitch;
 
     @Value("${topic.dispatchertopic}")
     private String dispatchertopic;
@@ -25,7 +25,7 @@ public class ErrorHandling {
     ObjectMapper objectMapper;
 
     public void handleInvalidPayload(ReqPayload reqPayload) throws JsonProcessingException {
-        reqPayload.getHeader().setTarget(errortopic);
+        reqPayload.getHeader().setTarget(defaultSwitch);
         String reqPayloadString = objectMapper.writeValueAsString(reqPayload);
         kafkaUtils.publishToResponseTopic(reqPayloadString,dispatchertopic,reqPayload.getHeader().getMsgId());
 

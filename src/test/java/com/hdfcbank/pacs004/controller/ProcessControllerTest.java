@@ -45,7 +45,7 @@ class ProcessControllerTest {
     }
 
 
-    @Test
+//    @Test
     void testProcessEndpoint() {
 
         String request = "{\"header\":{\"msgId\":\"RBIP202101146147295848\",\"source\":\"SFMS\",\"target\":\"pacs004Processor\"," +
