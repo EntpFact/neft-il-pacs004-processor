@@ -295,7 +295,7 @@ public class Pacs004XmlProcessor {
     public Boolean validateRequest(ReqPayload request) throws JsonProcessingException {
         Boolean isValid =  request.getHeader().isInvalidPayload();
 
-        if(!isValid){
+        if(isValid){
             errorHandling.handleInvalidPayload(request);
         }
         return isValid;
